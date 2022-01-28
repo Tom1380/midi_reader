@@ -1,5 +1,3 @@
-extern crate midir;
-
 use midir::MidiInput;
 use std::error::Error;
 
