@@ -8,14 +8,14 @@ use std::marker::PhantomData;
 use std::sync::mpsc;
 use std::thread;
 
-// 36 -> C3
-// 37 -> C#3
+// 36 -> C2
+// 37 -> C#2
 // ...
-// 96 -> C8
+// 96 -> C7
 // We don't need it now, but it's very handy to keep.
 #[allow(dead_code)]
 pub fn note_name(note_index: u8) -> String {
-    let octave = note_index / 12;
+    let octave = (note_index / 12) - 1;
     let remainder = note_index % 12;
     // The 12 notes, octave independent.
     let absolute_notes = [
