@@ -1,6 +1,6 @@
-use std::time::Duration;
-
+use super::CustomSound;
 use rodio::Source;
+use std::time::Duration;
 
 /// Always has a rate of 48kHz and one channel.
 #[derive(Clone, Debug)]
@@ -9,9 +9,8 @@ pub struct SawWave {
     num_sample: usize,
 }
 
-impl SawWave {
-    #[inline]
-    pub fn new(freq: f32) -> SawWave {
+impl CustomSound for SawWave {
+    fn new(freq: f32) -> SawWave {
         SawWave {
             freq,
             num_sample: 0,
