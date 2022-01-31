@@ -64,13 +64,17 @@ impl NotePlayer {
         match self.sinks.get(&note_index) {
             Some(_) => {}
             None => {
-                let sink = Sink::try_new(&self.stream_handle).unwrap();
-                sink.set_volume(self.volume);
-                let sound_wave = Self::get_sound_wave(note_index);
-                sink.append(sound_wave);
-                self.sinks.insert(note_index, sink);
+                self.sinks.insert(note_index, self.build_sink(note_index));
             }
         }
+    }
+
+    fn build_sink(&self, note_index: u8) -> Sink {
+        let sink = Sink::try_new(&self.stream_handle).unwrap();
+        sink.set_volume(self.volume);
+        let sound_wave = Self::get_sound_wave(note_index);
+        sink.append(sound_wave);
+        sink
     }
 
     fn note_off(&mut self, note_index: u8) {
