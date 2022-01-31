@@ -1,7 +1,7 @@
 mod sound_playing;
 
 use midir::MidiInput;
-use sound_playing::NoteMessage;
+use sound_playing::*;
 use std::error::Error;
 use std::sync::mpsc;
 
@@ -22,7 +22,7 @@ fn run() -> Result<(), Box<dyn Error>> {
 
     let (tx, rx) = mpsc::channel();
 
-    spawn_note_player(rx);
+    spawn_note_player::<SquareWave>(rx);
 
     // _conn_in needs to be a named parameter, because it needs to be kept alive until the end of the scope
     let _conn_in = midi_in.connect(in_port, "midir-read-input", callback, tx)?;

@@ -1,8 +1,10 @@
 mod custom_sounds;
 
-use custom_sounds::*;
-use rodio::{OutputStream, OutputStreamHandle, Sink};
+use custom_sounds::CustomSound;
+pub use custom_sounds::{SawWave, SineWave, SquareWave};
+use rodio::{OutputStream, OutputStreamHandle, Sample, Sink};
 use std::collections::HashMap;
+use std::marker::PhantomData;
 use std::sync::mpsc;
 use std::thread;
 
@@ -31,17 +33,22 @@ pub enum NoteMessage {
     Off(u8),
 }
 
-struct NotePlayer {
+struct NotePlayer<S> {
     // We don't use it, but stream_handle needs it to work.
     _stream: OutputStream,
     stream_handle: OutputStreamHandle,
     sinks: HashMap<u8, Sink>,
     volume: f32,
+    _sound_type: PhantomData<S>,
 }
 
-pub fn spawn_note_player(rx: mpsc::Receiver<NoteMessage>) {
+pub fn spawn_note_player<S>(rx: mpsc::Receiver<NoteMessage>)
+where
+    S: 'static + CustomSound + Send,
+    S::Item: Sample + Send,
+{
     thread::spawn(move || {
-        let mut player = NotePlayer::new();
+        let mut player: NotePlayer<S> = NotePlayer::new();
         loop {
             let msg = rx.recv().unwrap();
             match msg {
@@ -56,14 +63,19 @@ pub fn spawn_note_player(rx: mpsc::Receiver<NoteMessage>) {
     });
 }
 
-impl NotePlayer {
-    fn new() -> NotePlayer {
+impl<S> NotePlayer<S>
+where
+    S: 'static + CustomSound + Send,
+    S::Item: Sample + Send,
+{
+    fn new() -> NotePlayer<S> {
         let (_stream, stream_handle) = OutputStream::try_default().unwrap();
         NotePlayer {
             _stream,
             stream_handle,
             sinks: HashMap::new(),
             volume: 0.1,
+            _sound_type: PhantomData,
         }
     }
 
@@ -92,8 +104,8 @@ impl NotePlayer {
         }
     }
 
-    fn get_sound_wave(note_index: u8) -> SawWave {
-        SawWave::new(Self::get_frequency(note_index))
+    fn get_sound_wave(note_index: u8) -> S {
+        S::new(Self::get_frequency(note_index))
     }
 
     // C1: 32hz
