@@ -93,7 +93,7 @@ impl NotePlayer {
 
     // C1: 32hz
     fn get_frequency(note_index: u8) -> f32 {
-        // TODO actually compute this
+        // TODO check this is accurate.
         32.0 * (2.0 as f32).powf(1.0 / 12.0 as f32).powf(note_index as f32)
     }
 }
