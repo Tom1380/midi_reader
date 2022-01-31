@@ -108,9 +108,16 @@ where
         S::new(Self::get_frequency(note_index))
     }
 
-    // C1: 32hz
+    /// MIDI supports notes from A0 onwards.
+    /// A0's MIDI code is 21 and it's frequency is 27.50hz.
     fn get_frequency(note_index: u8) -> f32 {
-        // TODO check this is accurate.
-        32.0 * (2.0_f32).powf(1.0 / 12.0_f32).powf(note_index as f32)
+        let distance_from_a0_in_semitones = note_index - 21;
+        // 27.50 is the frequency for our chosen starting point, which is A0.
+        27.50
+            * (2.0_f32)
+                // ¹²√2 because it needs to be 2 when raised to the power of 12.
+                // In other words, it needs to double every 12 notes, meaning the whole octave.
+                .powf(1.0 / 12.0_f32)
+                .powf(distance_from_a0_in_semitones as f32)
     }
 }
