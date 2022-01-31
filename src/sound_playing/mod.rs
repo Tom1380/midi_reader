@@ -1,6 +1,6 @@
 mod custom_sounds;
 
-use custom_sounds::SquareWave;
+use custom_sounds::*;
 use rodio::source::SineWave;
 use rodio::{OutputStream, OutputStreamHandle, Sink};
 use std::collections::HashMap;
@@ -93,8 +93,8 @@ impl NotePlayer {
         }
     }
 
-    fn get_sound_wave(note_index: u8) -> SquareWave {
-        SquareWave::new(Self::get_frequency(note_index))
+    fn get_sound_wave(note_index: u8) -> SawWave {
+        SawWave::new(Self::get_frequency(note_index))
     }
 
     // C1: 32hz
