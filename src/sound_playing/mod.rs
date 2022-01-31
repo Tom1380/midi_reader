@@ -1,3 +1,5 @@
+mod custom_sounds;
+
 use rodio::source::SineWave;
 use rodio::{OutputStream, OutputStreamHandle, Sink};
 use std::collections::HashMap;
