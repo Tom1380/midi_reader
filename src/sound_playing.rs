@@ -28,6 +28,7 @@ pub enum NoteMessage {
 }
 
 struct NotePlayer {
+    // We don't use it, but stream_handle needs it to work.
     _stream: OutputStream,
     stream_handle: OutputStreamHandle,
     sinks: HashMap<u8, Sink>,
