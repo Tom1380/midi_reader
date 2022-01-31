@@ -28,7 +28,7 @@ pub enum NoteMessage {
 }
 
 struct NotePlayer {
-    stream: OutputStream,
+    _stream: OutputStream,
     stream_handle: OutputStreamHandle,
     sinks: HashMap<u8, Sink>,
     volume: f32,
@@ -53,9 +53,9 @@ pub fn spawn_note_player(rx: mpsc::Receiver<NoteMessage>) {
 
 impl NotePlayer {
     fn new() -> NotePlayer {
-        let (stream, stream_handle) = OutputStream::try_default().unwrap();
+        let (_stream, stream_handle) = OutputStream::try_default().unwrap();
         NotePlayer {
-            stream,
+            _stream,
             stream_handle,
             sinks: HashMap::new(),
             volume: 0.1,
