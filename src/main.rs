@@ -1,10 +1,7 @@
 mod sound_playing;
 
 use midir::MidiInput;
-use rodio::source::{SineWave, Source};
-use rodio::{Decoder, OutputStream, OutputStreamHandle, Sink};
 use sound_playing::NoteMessage;
-use std::collections::HashMap;
 use std::error::Error;
 use std::sync::mpsc;
 

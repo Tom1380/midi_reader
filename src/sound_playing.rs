@@ -1,5 +1,5 @@
-use rodio::source::{SineWave, Source};
-use rodio::{Decoder, OutputStream, OutputStreamHandle, Sink};
+use rodio::source::SineWave;
+use rodio::{OutputStream, OutputStreamHandle, Sink};
 use std::collections::HashMap;
 use std::sync::mpsc;
 use std::thread;
@@ -8,6 +8,8 @@ use std::thread;
 // 37 -> C#3
 // ...
 // 96 -> C8
+// We don't need it now, but it's very handy to keep.
+#[allow(dead_code)]
 pub fn note_name(note_index: u8) -> String {
     let octave = note_index / 12;
     let remainder = note_index % 12;
