@@ -41,7 +41,7 @@ fn callback(_timestamp: u64, message: &[u8], tx: &mut mpsc::Sender<NoteMessage>)
     if let [_, note_index, velocity] = message {
         tx.send(match velocity {
             0 => NoteMessage::Off(*note_index),
-            _ => NoteMessage::On(*note_index),
+            _ => NoteMessage::On(*note_index, *velocity),
         })
         .unwrap();
     }

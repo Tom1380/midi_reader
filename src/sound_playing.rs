@@ -21,7 +21,9 @@ pub fn note_name(note_index: u8) -> String {
 
 #[derive(Debug)]
 pub enum NoteMessage {
-    On(u8),
+    // Note index, velocity
+    On(u8, u8),
+    // Note index
     Off(u8),
 }
 
@@ -38,8 +40,8 @@ pub fn spawn_note_player(rx: mpsc::Receiver<NoteMessage>) {
         loop {
             let msg = rx.recv().unwrap();
             match msg {
-                NoteMessage::On(note_index) => {
-                    player.note_on(note_index);
+                NoteMessage::On(note_index, velocity) => {
+                    player.note_on(note_index, velocity);
                 }
                 NoteMessage::Off(note_index) => {
                     player.note_off(note_index);
@@ -60,18 +62,19 @@ impl NotePlayer {
         }
     }
 
-    fn note_on(&mut self, note_index: u8) {
+    fn note_on(&mut self, note_index: u8, velocity: u8) {
         match self.sinks.get(&note_index) {
             Some(_) => {}
             None => {
-                self.sinks.insert(note_index, self.build_sink(note_index));
+                self.sinks
+                    .insert(note_index, self.build_sink(note_index, velocity));
             }
         }
     }
 
-    fn build_sink(&self, note_index: u8) -> Sink {
+    fn build_sink(&self, note_index: u8, velocity: u8) -> Sink {
         let sink = Sink::try_new(&self.stream_handle).unwrap();
-        sink.set_volume(self.volume);
+        sink.set_volume(self.volume * velocity as f32 / 100.0);
         let sound_wave = Self::get_sound_wave(note_index);
         sink.append(sound_wave);
         sink
