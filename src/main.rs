@@ -1,5 +1,14 @@
+mod sound_playing;
+
 use midir::MidiInput;
+use rodio::source::{SineWave, Source};
+use rodio::{Decoder, OutputStream, OutputStreamHandle, Sink};
+use sound_playing::NoteMessage;
+use std::collections::HashMap;
 use std::error::Error;
+use std::sync::mpsc;
+
+use crate::sound_playing::spawn_note_player;
 
 fn main() {
     match run() {
@@ -14,8 +23,12 @@ fn run() -> Result<(), Box<dyn Error>> {
     let in_port = &in_ports[1];
     let in_port_name = midi_in.port_name(in_port)?;
 
+    let (tx, rx) = mpsc::channel();
+
+    spawn_note_player(rx);
+
     // _conn_in needs to be a named parameter, because it needs to be kept alive until the end of the scope
-    let _conn_in = midi_in.connect(in_port, "midir-read-input", callback, ())?;
+    let _conn_in = midi_in.connect(in_port, "midir-read-input", callback, tx)?;
 
     println!("Connection open, reading input from '{in_port_name}'",);
 
@@ -24,28 +37,12 @@ fn run() -> Result<(), Box<dyn Error>> {
     }
 }
 
-fn callback(_timestamp: u64, message: &[u8], _additional_data: &mut ()) {
+fn callback(_timestamp: u64, message: &[u8], tx: &mut mpsc::Sender<NoteMessage>) {
     if let [_, note_index, velocity] = message {
-        let note = note_name(*note_index);
-        if *velocity == 0 {
-            println!("Note {note} off.");
-        } else {
-            println!("Note {note} on.");
-        }
+        tx.send(match velocity {
+            0 => NoteMessage::Off(*note_index),
+            _ => NoteMessage::On(*note_index),
+        })
+        .unwrap();
     }
-}
-
-// 36 -> C3
-// 37 -> C#3
-// ...
-// 96 -> C8
-fn note_name(note_index: u8) -> String {
-    let octave = note_index / 12;
-    let remainder = note_index % 12;
-    // The 12 notes, octave independent.
-    let absolute_notes = [
-        "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
-    ];
-    let note = absolute_notes[remainder as usize];
-    format!("{note}{octave}")
 }
