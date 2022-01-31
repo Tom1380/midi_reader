@@ -1,21 +1,20 @@
 use std::time::Duration;
 
-use rodio::{source::SineWave, Source};
+use rodio::Source;
 
-/// An infinite source that produces a sine.
-///
 /// Always has a rate of 48kHz and one channel.
 #[derive(Clone, Debug)]
 pub struct SquareWave {
-    inner_sine_wave: SineWave,
+    freq: f32,
+    num_sample: usize,
 }
 
 impl SquareWave {
-    /// The frequency of the sine.
     #[inline]
     pub fn new(freq: f32) -> SquareWave {
         SquareWave {
-            inner_sine_wave: SineWave::new(freq),
+            freq,
+            num_sample: 0,
         }
     }
 }
@@ -25,16 +24,12 @@ impl Iterator for SquareWave {
 
     #[inline]
     fn next(&mut self) -> Option<f32> {
-        let sin = self.inner_sine_wave.next()?;
+        self.num_sample = self.num_sample.wrapping_add(1);
 
-        // Simply compute the sine wave and analyse its sign.
-        let result = if sin == 0.0 {
-            0.0
-        } else if sin > 0.0 {
-            1.0
-        } else {
-            -1.0
-        };
+        let t = self.num_sample as f32 / self.sample_rate() as f32;
+        let ft = self.freq * t;
+        let result = 2.0 * (2.0 * ft.floor() - (2.0 * ft).floor()) + 1.0;
+
         Some(result)
     }
 }
