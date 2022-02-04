@@ -1,11 +1,6 @@
-mod sound_playing;
-
 use midir::MidiInput;
-use sound_playing::*;
+use note_player::*;
 use std::error::Error;
-use std::sync::mpsc;
-
-use crate::sound_playing::spawn_note_player;
 
 fn main() {
     match run() {
@@ -20,12 +15,10 @@ fn run() -> Result<(), Box<dyn Error>> {
     let in_port = &in_ports[1];
     let in_port_name = midi_in.port_name(in_port)?;
 
-    let (tx, rx) = mpsc::channel();
-
-    spawn_note_player::<SawWave>(rx);
+    let note_player = note_player::<SawWave>();
 
     // _conn_in needs to be a named parameter, because it needs to be kept alive until the end of the scope
-    let _conn_in = midi_in.connect(in_port, "midir-read-input", callback, tx)?;
+    let _conn_in = midi_in.connect(in_port, "midir-read-input", callback, note_player)?;
 
     println!("Connection open, reading input from '{in_port_name}'",);
 
@@ -34,12 +27,12 @@ fn run() -> Result<(), Box<dyn Error>> {
     }
 }
 
-fn callback(_timestamp: u64, message: &[u8], tx: &mut mpsc::Sender<NoteMessage>) {
+fn callback(_timestamp: u64, message: &[u8], note_player: &mut NotePlayerHandle) {
     if let [_, note_index, velocity] = message {
-        tx.send(match velocity {
-            0 => NoteMessage::Off(*note_index),
-            _ => NoteMessage::On(*note_index, *velocity),
-        })
+        match velocity {
+            0 => note_player.note_off(*note_index),
+            _ => note_player.note_on(*note_index, *velocity),
+        }
         .unwrap();
     }
 }

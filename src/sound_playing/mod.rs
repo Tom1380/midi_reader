@@ -1,12 +1,10 @@
 mod custom_sounds;
 
-use custom_sounds::CustomSound;
+pub use custom_sounds::CustomSound;
 pub use custom_sounds::{SawWave, SineWave, SquareWave};
 use rodio::{OutputStream, OutputStreamHandle, Sample, Sink};
 use std::collections::HashMap;
 use std::marker::PhantomData;
-use std::sync::mpsc;
-use std::thread;
 
 // 36 -> C2
 // 37 -> C#2
@@ -33,7 +31,7 @@ pub enum NoteMessage {
     Off(u8),
 }
 
-struct NotePlayer<S> {
+pub struct NotePlayer<S> {
     // We don't use it, but stream_handle needs it to work.
     _stream: OutputStream,
     stream_handle: OutputStreamHandle,
@@ -42,33 +40,12 @@ struct NotePlayer<S> {
     _sound_type: PhantomData<S>,
 }
 
-pub fn spawn_note_player<S>(rx: mpsc::Receiver<NoteMessage>)
-where
-    S: 'static + CustomSound + Send,
-    S::Item: Sample + Send,
-{
-    thread::spawn(move || {
-        let mut player: NotePlayer<S> = NotePlayer::new();
-        loop {
-            let msg = rx.recv().unwrap();
-            match msg {
-                NoteMessage::On(note_index, velocity) => {
-                    player.note_on(note_index, velocity);
-                }
-                NoteMessage::Off(note_index) => {
-                    player.note_off(note_index);
-                }
-            }
-        }
-    });
-}
-
 impl<S> NotePlayer<S>
 where
     S: 'static + CustomSound + Send,
     S::Item: Sample + Send,
 {
-    fn new() -> NotePlayer<S> {
+    pub fn new() -> NotePlayer<S> {
         let (_stream, stream_handle) = OutputStream::try_default().unwrap();
         NotePlayer {
             _stream,
@@ -79,7 +56,7 @@ where
         }
     }
 
-    fn note_on(&mut self, note_index: u8, velocity: u8) {
+    pub fn note_on(&mut self, note_index: u8, velocity: u8) {
         match self.sinks.get(&note_index) {
             Some(_) => {}
             None => {
@@ -97,7 +74,7 @@ where
         sink
     }
 
-    fn note_off(&mut self, note_index: u8) {
+    pub fn note_off(&mut self, note_index: u8) {
         match self.sinks.remove(&note_index) {
             Some(sink) => sink.stop(),
             None => {}
@@ -119,5 +96,15 @@ where
                 // In other words, it needs to double every 12 notes, meaning the whole octave.
                 .powf(1.0 / 12.0_f32)
                 .powf(distance_from_a0_in_semitones as f32)
+    }
+}
+
+impl<S> Default for NotePlayer<S>
+where
+    S: 'static + CustomSound + Send,
+    S::Item: Sample + Send,
+{
+    fn default() -> Self {
+        Self::new()
     }
 }

@@ -3,6 +3,14 @@ name = "midi_reader"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+name = "note_player"
+path = "src/lib.rs"
+
+[[bin]]
+name = "midi_player"
+path = "src/main.rs"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
 midir = "*"
