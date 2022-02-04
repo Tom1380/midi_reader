@@ -31,6 +31,9 @@ where
                 NoteMessage::Off(note_index) => {
                     player.note_off(note_index);
                 }
+                NoteMessage::Reset => {
+                    player.reset();
+                }
             }
         }
     });
@@ -49,5 +52,9 @@ impl NotePlayerHandle {
 
     pub fn note_off(&self, note_index: u8) -> Result<(), mpsc::SendError<NoteMessage>> {
         self.tx.send(NoteMessage::Off(note_index))
+    }
+
+    pub fn reset(&self) -> Result<(), mpsc::SendError<NoteMessage>> {
+        self.tx.send(NoteMessage::Reset)
     }
 }

@@ -29,6 +29,8 @@ pub enum NoteMessage {
     On(u8, u8),
     // Note index
     Off(u8),
+    // Stop all notes
+    Reset,
 }
 
 pub struct NotePlayer<S> {
@@ -79,6 +81,14 @@ where
             Some(sink) => sink.stop(),
             None => {}
         }
+    }
+
+    pub fn reset(&mut self) {
+        for sink in self.sinks.values() {
+            sink.stop();
+        }
+
+        self.sinks.clear();
     }
 
     fn get_sound_wave(note_index: u8) -> S {
