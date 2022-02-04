@@ -1,5 +1,10 @@
-pub mod sound_playing;
-pub use sound_playing::*;
+mod sound_playing;
+
+pub use sound_playing::custom_sounds;
+pub use sound_playing::note_name;
+
+use sound_playing::custom_sounds::CustomSound;
+use sound_playing::*;
 
 use rodio::Sample;
 use std::sync::mpsc;

@@ -1,7 +1,7 @@
-mod custom_sounds;
+pub mod custom_sounds;
 
-pub use custom_sounds::CustomSound;
-pub use custom_sounds::{SawWave, SineWave, SquareWave};
+use custom_sounds::CustomSound;
+
 use rodio::{OutputStream, OutputStreamHandle, Sample, Sink};
 use std::collections::HashMap;
 use std::marker::PhantomData;

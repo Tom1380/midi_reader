@@ -1,4 +1,5 @@
 use midir::MidiInput;
+use note_player::custom_sounds::*;
 use note_player::*;
 use std::error::Error;
 
